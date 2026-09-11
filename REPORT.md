@@ -108,16 +108,43 @@ regularized output.
 ### Kitsap County — forested low-density suburbia
 
 ![kitsap13](outputs/figures/compare_kitsap13.png)
+*kitsap13 — houses scattered under conifer canopy. Most structures are found;
+the smallest outbuildings are not (see failure analysis).*
+
 ![kitsap20](outputs/figures/compare_kitsap20.png)
+*kitsap20 — very low density, heavy shadow. Detection holds up in the open,
+degrades where roofs sit under tree crowns.*
+
 ![kitsap31](outputs/figures/compare_kitsap31.png)
+*kitsap31 — big-box retail beside suburban housing. The large roof, including
+the stepped notch at its lower right, is followed accurately. Single-axis
+buildings at this scale were a weakness in v1.*
+
 ![kitsap35](outputs/figures/compare_kitsap35.png)
+*kitsap35 — suburban streets threaded through woodland, roughly the hardest
+density-versus-occlusion mix in the region.*
 
 ### Tyrol-w — Alpine village cores and valley-floor industry
 
 ![tyrol-w6](outputs/figures/compare_tyrol-w6.png)
+*tyrol-w6 — an institutional complex with wings at several orientations. This is
+the case that should break a regularizer assuming one dominant axis per
+building; the area-change guard keeps the oblique sections unsnapped rather than
+distorting them.*
+
 ![tyrol-w20](outputs/figures/compare_tyrol-w20.png)
+*tyrol-w20 — note the tennis courts. They are large, rectangular, flat and
+high-contrast, and all of them are correctly rejected. A model that had learned
+"big rectangle" rather than "building" would claim them.*
+
 ![tyrol-w24](outputs/figures/compare_tyrol-w24.png)
+*tyrol-w24 — dense village core, the highest building density anywhere in the
+test set, with courtyards and shared walls throughout.*
+
 ![tyrol-w31](outputs/figures/compare_tyrol-w31.png)
+*tyrol-w31 — an isolated industrial building against open fields. Easy to detect,
+hard to delineate: nearly all the error here is boundary placement rather than
+detection, which is what Boundary IoU and PoLiS are for.*
 
 Each crop is the densest 270 m window in its scene, selected automatically. That
 biases the gallery toward busy areas; the failure analysis below is deliberately
