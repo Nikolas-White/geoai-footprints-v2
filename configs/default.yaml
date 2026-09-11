@@ -1,0 +1,141 @@
+# ---------------------------------------------------------------------------
+# v2 configuration.
+#
+# Everything an ablation might change lives here and can be overridden on the
+# command line with --set key.path=value, so one runner script can drive the
+# whole ladder unattended.
+# ---------------------------------------------------------------------------
+
+project:
+  name: geoai-footprints
+  seed: 42
+
+paths:
+  download_dir: data/archive
+  raw_root: data/raw
+  inria_dir: data/raw/AerialImageDataset/train
+  processed_dir: data/processed
+  outputs_dir: outputs
+
+# ---------------------------------------------------------------------------
+# EXPERIMENT PROTOCOL
+#
+# Technique selection must never see the test regions, or every honest claim in
+# the report becomes false. Two modes:
+#
+#   ablation : train on a SUBSET of the training cities and hold out ANOTHER
+#              training city as an out-of-domain validation region. Short runs.
+#              This is where techniques get chosen.
+#   final    : winning config, all training cities, long schedule, dense
+#              tiling. Test regions evaluated exactly once.
+# ---------------------------------------------------------------------------
+experiment:
+  mode: ablation
+
+  ablation:
+    train_cities: [austin, chicago]
+    oodval_cities: [vienna]        # unseen region used for technique selection
+    epochs: 15
+    stride: 512
+
+  final:
+    train_cities: [austin, chicago, vienna]
+    oodval_cities: []
+    epochs: 60
+    stride: 256                    # 4x the tiles at no annotation cost
+
+data:
+  test_cities: [kitsap, tyrol-w]   # touched once, at the very end
+  val_image_ids: [31, 32, 33, 34, 35, 36]
+  tile_size: 512
+  empty_tile_keep_frac: 0.10
+  min_building_px: 32
+  png_compression: 1
+
+# ---------------------------------------------------------------------------
+# PREPROCESSING  (ablations B and C)
+# ---------------------------------------------------------------------------
+preprocess:
+  # imagenet : fixed ImageNet mean/std. Assumes Kitsap looks like Vienna. It
+  #            does not, and that assumption is baked into every prediction.
+  # per_tile : each tile standardised by its OWN channel statistics, which
+  #            removes global brightness and colour offsets between regions.
+  normalization: imagenet          # imagenet | per_tile
+
+  # Extra derived input channels appended after RGB.
+  #   exg : Excess Green, 2G - R - B. A vegetation index computed from RGB.
+  #         INRIA has no near-infrared band, and NIR is what would properly
+  #         separate foliage from roofs, so this is the closest available
+  #         proxy. Aimed at the Kitsap tree-canopy failures.
+  extra_channels: []               # [] or [exg]
+
+# ---------------------------------------------------------------------------
+# AUGMENTATION  (ablations E and F)
+# ---------------------------------------------------------------------------
+augment:
+  scale_range: [0.75, 1.35]        # widen to [0.5, 2.0] for ablation E
+  p_scale: 0.5
+  p_photo: 0.8
+  p_blur: 0.2
+
+  # Fourier Domain Adaptation. Swaps the low-frequency amplitude spectrum of a
+  # training tile with a reference tile's, keeping phase (which carries the
+  # structure) intact. The model sees Austin geometry wearing another region's
+  # colour and illumination.
+  #   none  : disabled
+  #   intra : reference drawn from a DIFFERENT training city. No target data is
+  #           touched, so this is pure domain generalization.
+  fda_mode: none                   # none | intra
+  fda_beta: 0.01                   # fraction of the spectrum swapped
+  p_fda: 0.5
+
+# ---------------------------------------------------------------------------
+train:
+  arch: unet
+  encoder: resnet50
+  encoder_weights: imagenet
+  decoder_attention: scse
+  in_channels: 3                   # auto-adjusted when extra_channels is set
+  batch_size: 16
+  num_workers: 8
+  epochs: 15                       # overridden by the experiment mode
+  lr: 0.0003
+  weight_decay: 0.0001
+  amp: true
+
+  loss:
+    # bce_dice      : the v1 loss.
+    # focal_tversky : Tversky with beta > alpha penalises FALSE NEGATIVES
+    #                 harder than false positives. v1 ran precision 0.877 /
+    #                 recall 0.771, so recall is where the loss should push.
+    type: bce_dice                 # bce_dice | focal_tversky
+    interior_weight: 1.0
+    boundary_weight: 0.5
+    dice_weight: 0.5
+    bce_weight: 0.5
+    boundary_pos_weight: 2.0
+    tversky_alpha: 0.3             # weight on false positives
+    tversky_beta: 0.7              # weight on false negatives
+    tversky_gamma: 1.33            # focal exponent; 1.0 = plain Tversky
+
+  boundary_width: 5
+
+inference:
+  tile_size: 512
+  overlap: 128
+  batch_size: 8
+  threshold_interior: 0.5
+  threshold_boundary: 0.4
+  multi_scale: []                  # e.g. [0.75, 1.0, 1.25]; [] disables
+
+vectorize:
+  min_area_m2: 20.0
+  simplify_tolerance_m: 0.5
+  regularize: true
+  angle_snap_deg: 20.0
+  min_edge_m: 2.0
+  hole_min_area_m2: 10.0
+
+evaluate:
+  iou_thresholds: [0.25, 0.5, 0.75]
+  boundary_tolerance_m: 1.0

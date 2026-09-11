@@ -1,0 +1,11 @@
+tag,oodval_cities,scenes,iou,f1,precision,recall,normalization,extra_channels,loss,scale_range,fda,encoder,arch,epochs,in_domain_val_iou,tta,minutes
+A_baseline,vienna,36,0.7289,0.8432,0.789,0.9054,imagenet,,bce_dice,"[0.75, 1.35]",none,resnet50,unet,15,0.7844,False,1.2
+B_pertile,vienna,36,0.7337,0.8464,0.7992,0.8995,per_tile,,bce_dice,"[0.75, 1.35]",none,resnet50,unet,15,0.7894,False,1.4
+C_exg,vienna,36,0.7314,0.8449,0.807,0.8864,per_tile,exg,bce_dice,"[0.75, 1.35]",none,resnet50,unet,15,0.7834,False,1.7
+D_tversky,vienna,36,0.7407,0.8511,0.7925,0.919,per_tile,exg,focal_tversky,"[0.75, 1.35]",none,resnet50,unet,15,0.7863,False,1.7
+E_scale,vienna,36,0.719,0.8365,0.7615,0.928,per_tile,exg,focal_tversky,"[0.5, 2.0]",none,resnet50,unet,15,0.7904,False,1.7
+F_fda,vienna,36,0.736,0.8479,0.7881,0.9175,per_tile,exg,focal_tversky,"[0.5, 2.0]",intra,resnet50,unet,15,0.7902,False,1.7
+G_segformer,vienna,36,0.7534,0.8594,0.8035,0.9236,per_tile,exg,focal_tversky,"[0.5, 2.0]",intra,mit_b2,segformer,15,0.8066,False,1.7
+H_no_scale,vienna,36,0.7603,0.8638,0.8153,0.9186,per_tile,exg,focal_tversky,"[0.75, 1.35]",intra,mit_b2,segformer,15,0.8059,False,1.7
+I_lean,vienna,36,0.755,0.8604,0.805,0.924,per_tile,,focal_tversky,"[0.75, 1.35]",intra,mit_b2,segformer,15,0.8023,False,1.3
+J_no_fda,vienna,36,0.7586,0.8628,0.8172,0.9137,per_tile,,focal_tversky,"[0.75, 1.35]",none,mit_b2,segformer,15,0.7996,False,1.3

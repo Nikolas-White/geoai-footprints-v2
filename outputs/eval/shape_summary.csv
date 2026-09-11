@@ -1,0 +1,5 @@
+geometry,buildings,vertices,orthogonality
+"predicted, no regularization",14985,11.08,0.143
+"predicted, regularized",14816,6.56,0.643
+"ground truth, raster-traced",15704,65.38,1.0
+"ground truth, simplified",15704,7.34,0.88

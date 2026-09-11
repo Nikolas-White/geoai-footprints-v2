@@ -1,0 +1,4 @@
+group,scenes,pixel_iou,pixel_f1,pixel_precision,pixel_recall,boundary_iou_1m,boundary_iou_2m,boundary_iou_3m
+ALL (unseen regions),72,0.7454,0.8542,0.858,0.8504,0.2407,0.4449,0.5369
+kitsap,36,0.6639,0.798,0.8067,0.7895,0.1785,0.3544,0.45
+tyrol-w,36,0.8186,0.9003,0.8996,0.9009,0.3038,0.5367,0.6233
